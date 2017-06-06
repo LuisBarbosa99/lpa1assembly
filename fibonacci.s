@@ -1,8 +1,8 @@
-LD R1 [5]
-LD R2 [8]
-LD R3 [8]
-LD R4 [5]
-LD R5 [1]
+LD R1 [0] //elemento menor
+LD R2 [1] //elemento maior
+LD R3 [] // armazenador
+LD R4 [x] // nº do termo 
+LD R5 [1] //subtraendo
 JZ R4 fim
 ADD R1 R2 R3 #início
 LD R2 R1 
