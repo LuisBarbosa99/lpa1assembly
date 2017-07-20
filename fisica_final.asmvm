@@ -1,0 +1,130 @@
+.DATA 
+entrada1 = "arquivo1.txt"
+s0 = 0
+v0 = 0
+t = 0 
+a = 0
+.CODE
+main:
+PUSH 1 ; Tipo do arquivo (Leitura)
+PUSH entrada1 ; Nome da variável do arquivo
+SYSCALL 0 R1 ;FOPEN (R1 = registrador p/ erro)
+JNZ R1 erro ; Condição de erro 
+
+POP R2 ;(R2 = handler do arquivo) 
+PUSH R2
+SYSCALL 4 R1 ;leitura do inteiro p/ a variável s0
+POP R3 ;Retirada do valor de s0 da pilha 
+ST4 R3 s0 ;Guarda o valor atribuído a "s0" e põe na variável
+PUSH R2 
+SYSCALL 4 R1 ;leitura do inteiro p/ a variável v0
+POP R3 ;Retirada do valor de v0 da pilha
+ST4 R3 v0 ;Guarda o valor atribuído a "v0" e põe na variável
+PUSH R2 
+SYSCALL 4 R1 ;leitura do inteiro p/ a variável t
+POP R3 ;Retirada do valor de t da pilha
+ST4 R3 t ;Guarda o valor atribuído a "t" e põe na variável
+PUSH R2 
+SYSCALL 4 R1 ;leitura do inteiro p/ a variável a
+POP R3 ;Retirada do valor de a da pilha
+ST4 R3 a ;Guarda o valor atribuído a "a" e põe na variável
+
+LD4 R3 v0 ;Guarda o valor de "v0" e põe no registrador R3
+PUSH R3
+LD4 R3 a ;Guarda o valor de "a" e põe no registrador R3  
+PUSH R3 
+LD4 R3 t ;;Guarda o valor de "t" e põe no registrador R3
+PUSH R3 
+
+CALL des_vel ;função que calcula a velocidade V = Vo + a*t
+CALL con_decimal ;função que converte o número de ponto fixo pra decimal
+POP R4 ;retira o resultado da função da pilha 
+PRINT "A velocidade e " R4 "\n"
+
+LD4 R5 s0 ;Guarda o valor de "s0" e põe no registrador R5 
+PUSH R5 
+LD4 R5 v0 ;Guarda o valor de "v0" e põe no registrador R5 
+PUSH R5 
+LD4 R5 t ;Guarda o valor de "t" e põe no registrador R5 
+PUSH R5 
+
+CALL des_vel ;função que calcula o deslocamento S = So + Vo*t
+CALL con_decimal
+POP R6 ;retira o resultado da função da pilha 
+PRINT "O espaço e " R6 "\n" 
+
+LD4 R7 t ;Guarda o valor de "t" e põe no registrador R7 
+PUSH R7
+LD4 R7 s0 ;Guarda o valor de "s0" e põe no registrador R7
+PUSH R7 
+LD4 R7 R6 ;Guarda o valor de R6 e põe no registrador R7
+PUSH R7
+
+CALL vel_media ;função que calcula a velocidade média Vm = S - So / t
+CALL con_decimal
+
+POP R8 ;Pega o valor da velocidade média e põe em R8 
+PRINT "A velocidade media e " R8 "\n"
+PUSH R2 
+SYSCALL 1 R1 ;FCLOSE
+EXIT 0
+
+des_vel: ;CÁLCULO DO S = So + Vo*t E V = Vo + a*t 
+CALL con_pontofixo ;função que converte de decimal para ponto fixo
+POP R3  
+CALL con_pontofixo
+PUSH R3
+CALL mul_pontofixo ;função que multiplica 2 números da pilha em ponto fixo
+POP R3
+CALL con_pontofixo
+POP R4 
+ADD R3 R4 R4 
+PUSH R4 
+RET
+
+vel_media: ;CÁLCULO DA VELOCIDADE MÉDIA Vm = S - So / t 
+POP R4 
+POP R3
+SUB R4 R3 R4 
+PUSH R4 
+CALL con_pontofixo
+POP R4 
+POP R5  
+PUSH R5
+CALL con_pontofixo
+PUSH R4 
+CALL div_pontofixo
+RET
+
+con_decimal:
+POP R1 
+SHR R1 8 R1 
+PUSH R1 
+RET
+
+con_pontofixo:
+POP R1 
+SHL R1 8 R1 
+PUSH R1 
+RET
+
+mul_pontofixo:
+POP R1 
+POP R2 
+MUL R1 R2 R1 
+SHR R1 8 R1 
+PUSH R1 
+RET
+
+div_pontofixo:
+POP R1 
+POP R2 
+SHL R1 12 R1 
+DIV R1 R2 R1 
+SHR R1 4 R1 
+PUSH R1 
+RET
+
+erro: ; Código de erro em abertura de arquivos
+PRINT "Não foi possível abrir o arquivo \n" 
+EXIT 1
